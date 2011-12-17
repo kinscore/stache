@@ -4,8 +4,8 @@ DISCLAIMER: I am not a cryptography or security expert.
 
 Currently just a statement of intent, Stache is planned to be a secure
 temporary storage provider for Android to allow applications to share data
-through the standard intent pattern while minimizing possibility of leaking
-that data.
+through the standard Content Provider pattern while minimizing possibility of
+leaking that data.
 
 When data is provided to insert, Stache will encrypt it with a temporary key
 given only to the program that provided the data (and not stored), then save
