@@ -1,0 +1,70 @@
+Stache: secure temporary storage for Android
+
+DISCLAIMER: I am not a cryptography or security expert.
+
+Currently just a statement of intent, Stache is planned to be a secure
+temporary storage provider for Android to allow applications to share data
+through the standard intent pattern while minimizing possibility of leaking
+that data.
+
+When data is provided to insert, Stache will encrypt it with a temporary key
+given only to the program that provided the data (and not stored), then save
+only the encrypted version of the data. Stache also generates an ID and a
+password; only a hash of the password is stored in the database and the
+plaintext password is only given to the program that provided the data.
+
+Thus, the Stache database contains only a hashed password and encrypted data.
+The URI to retrive this data (given to the program which stored it) contains a
+password and an encryption key.
+
+When a program requests a file, Stache first matches the ID to its database. If
+there is a matching file, Stache checks the password against its hash. If the
+password matches, the given key is used to decrypt the data, and the decrypted
+version is sent to the requesting program. After successful transmission, the
+database entry is deleted.
+
+In this way, Stache provides a content store that acts, as far as the programs
+involved are concerned, like any other (except that data is one-time read,
+which should usually not be a problem); an insert URI and data stream are
+pushed in and a retreival URI is given back, which can then be used to retrieve
+the same data stream that was pushed in.
+
+Depending on security settings (which are configurable only at compile time, so
+that they cannot be tampered with), Stache may delete a database entry or clear
+its whole database if tampering (e.g. incorrect password, non-existant ID) is
+detected.
+
+Stache is not intended to be a full security solution. It only handles a single
+limited case and cannot be guaranteed to provide full protection even in this
+situation.
+
+
+TODO:
+	Storage:
+		Randomly generate a strong encryption key (256-bit AES?)
+		Encrypt data
+		Zero/randomize any unencrypted copies in memory
+		Randomly generate a strong password
+			Variable length, ? to ? characters?
+			Any characters that are allowed in URIs
+		Hash the password (SHA-2?)
+		Randomly generate an ID that is difficult to guess
+			Same method as password?
+		Store encrypted data in database
+		Generate URI: ID/password/key
+		Zero/randomize any other instances of ID/password/key
+		return URI
+	Retrieval:
+		Match ID
+		If no such entry...
+			Clear all database entries if security is set to
+			return Zero data
+		Check password
+		If password matches...
+			Decrypt data
+			Delete database entry
+			Give unencrypted data to requesting program
+		Otherwise
+			Delete database entry if security is set to
+			Clear all database entries if security is set to
+			Return zero data
